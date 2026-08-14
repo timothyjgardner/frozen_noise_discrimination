@@ -48,7 +48,8 @@ The final command performs the complete pipeline:
 2. Regenerates the exemplar-versus-source statistics experiment.
 3. Writes CSV and dependency-free SVG outputs for both experiments.
 4. Compares every reproduced field with the checked-in reference CSVs.
-5. Builds the eight-page PDF report from the reproduced CSVs.
+5. Builds the ten-page PDF report from the reproduced CSVs, including a
+   mathematical appendix locating each source of variability.
 6. Reopens the PDF and verifies its page count and required sections.
 7. Verifies the checked-in reference-artifact hashes.
 8. Writes machine-readable reproduction metadata and SHA-256 hashes.
@@ -81,7 +82,7 @@ make reproduce
 |-- scripts/
 |   |-- reproduce_all.py             End-to-end deterministic reproduction
 |   |-- run_source_statistics.py     Standalone source-statistics sweep
-|   `-- build_report.py              Eight-page PDF report builder
+|   `-- build_report.py              Ten-page PDF report builder
 |-- tests/test_model.py              Unit and integration tests
 |-- results/accuracy.csv             Checked-in reference numbers
 |-- results/accuracy.svg             Checked-in reference plot
@@ -198,6 +199,26 @@ matched rate and temporal decoders is the highest-value next experiment.
 Other useful extensions are acoustic noise before the filterbank, threshold
 jitter within channels, a leaky integrator with a tunable time constant, and a
 more realistic auditory-nerve front end.
+
+## Mathematical noise model
+
+Appendix A of the PDF write-up distinguishes four sources of variability:
+
+- Frozen-exemplar deviations occur in the stimulus and shrink approximately as
+  `T^(-1/2)` across independent waveforms.
+- Spike dropout is applied after threshold crossings but before rate pooling.
+- Spontaneous spikes are added before rate pooling.
+- Fixed Gaussian readout noise is added after the entire trace has been pooled
+  to one rate per channel.
+
+The resulting conditional rate variance is approximately
+
+```text
+Var[r_k(T)] = {rho_k p(1-p) + lambda}/T + sigma_read^2.
+```
+
+Thus dropout and spontaneous-count noise average down with duration, while the
+post-pooling readout-noise floor does not.
 
 ## Reproducibility notes
 

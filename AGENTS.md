@@ -31,6 +31,10 @@ checked-in reference artifacts during an ordinary verification run.
 - End-to-end runner: `scripts/reproduce_all.py`
 - Model defaults: `ExperimentConfig` and `CochleaConfig`
 
+The reference write-up has 10 pages. Its final two pages form Appendix A,
+which gives the complete stochastic feature equation and shows which noise
+terms average down with duration.
+
 The expected 1.6 s accuracies are 100.0%, 88.0%, 72.3%, and 59.8% at 0, 10,
 20, and 40 spikes/s readout-noise SD. The clean rate distance should decline
 from about 69.3 spikes/s at 25 ms to 8.2 spikes/s at 1.6 s.

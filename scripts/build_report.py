@@ -506,6 +506,15 @@ def make_styles() -> dict[str, ParagraphStyle]:
             leading=10,
             textColor=INK,
         ),
+        "equation": ParagraphStyle(
+            "Equation",
+            parent=sample["Code"],
+            fontName="Courier",
+            fontSize=8.1,
+            leading=12,
+            textColor=INK,
+            alignment=TA_LEFT,
+        ),
     }
 
 
@@ -520,6 +529,32 @@ def callout(text: str, styles: dict[str, ParagraphStyle], fill=PALE_BLUE) -> Tab
                 ("RIGHTPADDING", (0, 0), (-1, -1), 12),
                 ("TOPPADDING", (0, 0), (-1, -1), 10),
                 ("BOTTOMPADDING", (0, 0), (-1, -1), 10),
+            ]
+        )
+    )
+    return table
+
+
+def equation_block(
+    lines: list[str],
+    styles: dict[str, ParagraphStyle],
+    fill=PALE_GRAY,
+) -> Table:
+    """Render one or more compact display equations in a stable text form."""
+
+    table = Table(
+        [[Paragraph("<br/>".join(lines), styles["equation"])]],
+        colWidths=[7.02 * inch],
+    )
+    table.setStyle(
+        TableStyle(
+            [
+                ("BACKGROUND", (0, 0), (-1, -1), fill),
+                ("BOX", (0, 0), (-1, -1), 0.6, LINE),
+                ("LEFTPADDING", (0, 0), (-1, -1), 11),
+                ("RIGHTPADDING", (0, 0), (-1, -1), 11),
+                ("TOPPADDING", (0, 0), (-1, -1), 7),
+                ("BOTTOMPADDING", (0, 0), (-1, -1), 7),
             ]
         )
     )
@@ -1131,6 +1166,183 @@ def build_pdf(
             Paragraph("Conclusion", styles["subsection"]),
             Paragraph(
                 "The model now reproduces both sides of the qualitative psychophysical result. Short frozen noises generate large accidental fingerprints across cochlear channels, but those fingerprints contract as duration grows. Stable differences between noise-source spectra persist and become easier to estimate as within-source fluctuations average away. The result is mechanistically interpretable, while its most important alternatives - preserved temporal coding and discrimination based on nonspectral texture statistics - remain straightforward to test next.",
+                styles["body"],
+            ),
+            PageBreak(),
+        ]
+    )
+
+    # Mathematical appendix: locations and duration scaling of variability.
+    story.extend(
+        [
+            Paragraph("Appendix A. Where variability enters", styles["section"]),
+            Paragraph("A.1 From a stochastic waveform to a clean spike count", styles["subsection"]),
+            Paragraph(
+                "For source family s and exemplar e, the waveform x_(s,e)(t) is sampled once and then frozen. Its power spectral density is controlled by a source-specific exponent:",
+                styles["body"],
+            ),
+            equation_block(
+                [
+                    "PSD_s(f) propto f^(-alpha_s)",
+                    "alpha_s = 0 (white), 0.5 (light-pink), 1 (pink), or 2 (brown)",
+                ],
+                styles,
+                PALE_BLUE,
+            ),
+            Spacer(1, 0.08 * inch),
+            Paragraph(
+                "The waveform is filtered in cochlear channel k, converted to an analytic envelope, and thresholded. A spike is recorded only at an upward crossing, subject to the 1 ms refractory interval:",
+                styles["body"],
+            ),
+            equation_block(
+                [
+                    "y_(s,e,k)(t) = (h_k * x_(s,e))(t)",
+                    "a_(s,e,k)(t) = | y_(s,e,k)(t) + i H{y_(s,e,k)}(t) |",
+                    "N_(s,e,k)(T) = sum_[0 &lt;= t &lt; T] 1[upward crossing of threshold]",
+                ],
+                styles,
+            ),
+            Spacer(1, 0.08 * inch),
+            Paragraph(
+                "The resulting clean rate separates into a stable source mean and an accidental finite-exemplar deviation:",
+                styles["body"],
+            ),
+            equation_block(
+                [
+                    "N_(s,e,k)(T) / T = mu_(s,k) + delta_(s,e,k)(T)",
+                    "SD[delta_(s,e,k)(T)] propto T^(-1/2)",
+                ],
+                styles,
+                PALE_TEAL,
+            ),
+            Spacer(1, 0.09 * inch),
+            callout(
+                "<b>Important distinction.</b> The frozen waveform is the signal being classified. Its exemplar deviation is variability across different waveforms, not fresh noise added on every presentation.",
+                styles,
+                PALE_ORANGE,
+            ),
+            Spacer(1, 0.10 * inch),
+            Paragraph("A.2 Presentation noise before temporal pooling", styles["subsection"]),
+            Paragraph(
+                "On presentation j, every clean spike is independently retained with probability 1-p. The detected count D therefore follows a binomial distribution:",
+                styles["body"],
+            ),
+            equation_block(
+                [
+                    "D^(j)_(s,e,k) ~ Binomial(N_(s,e,k), 1-p),    p = 0.03",
+                    "Var[D_k / T] = N_k p(1-p) / T^2  approx  rho_k p(1-p) / T",
+                ],
+                styles,
+            ),
+            Spacer(1, 0.07 * inch),
+            Paragraph(
+                "Independent spontaneous events are then added before pooling:",
+                styles["body"],
+            ),
+            equation_block(
+                [
+                    "B^(j)_k ~ Poisson(lambda T),    lambda = 0.2 spikes/s/channel",
+                    "Var[B_k / T] = lambda / T",
+                    "r_tilde^(j)_(s,e,k) = (D^(j)_(s,e,k) + B^(j)_k) / T",
+                ],
+                styles,
+            ),
+            Spacer(1, 0.07 * inch),
+            Paragraph(
+                "Both dropout and spontaneous-count variability are upstream of the whole-trace average. Their variance in rate units therefore decreases approximately as 1/T.",
+                styles["body"],
+            ),
+            PageBreak(),
+        ]
+    )
+
+    story.extend(
+        [
+            Paragraph("Appendix A. Noise after pooling and duration effects", styles["section"]),
+            Paragraph("A.3 Fixed post-pooling readout noise", styles["subsection"]),
+            Paragraph(
+                "After the entire trace has been compressed to one rate per cochlear channel, independent Gaussian readout noise is added. Unlike count noise, its standard deviation is specified directly in spikes/s and does not decrease with T:",
+                styles["body"],
+            ),
+            equation_block(
+                [
+                    "eta^(j)_k ~ Normal(0, sigma_read^2)",
+                    "r^(j)_(s,e,k) = max[0, r_tilde^(j)_(s,e,k) + eta^(j)_k]",
+                    "sigma_read = 0, 10, 20, or 40 spikes/s",
+                ],
+                styles,
+                PALE_BLUE,
+            ),
+            Spacer(1, 0.08 * inch),
+            Paragraph("Complete stochastic feature equation", styles["subsection"]),
+            equation_block(
+                [
+                    "r^(j)_(s,e,k)(T) = max[0,",
+                    "  {Binomial(N_(s,e,k)(T), 0.97) + Poisson(0.2 T)} / T",
+                    "  + Normal(0, sigma_read^2) ]",
+                ],
+                styles,
+                PALE_TEAL,
+            ),
+            Spacer(1, 0.08 * inch),
+            Paragraph(
+                "Ignoring the small nonlinearity introduced by clipping negative rates at zero, the conditional trial variance is approximately:",
+                styles["body"],
+            ),
+            equation_block(
+                [
+                    "Var[r_k(T)] approx {rho_k p(1-p) + lambda} / T + sigma_read^2",
+                ],
+                styles,
+            ),
+            Spacer(1, 0.09 * inch),
+            styled_table(
+                [
+                    ["Variability", "Location", "Changes across", "Rate-variance scaling"],
+                    ["Frozen-exemplar deviation", "Stimulus, before filterbank", "Independent waveforms", "SD approx T^(-1/2)"],
+                    ["Spike dropout", "After spikes, before pooling", "Presentations", "Variance approx 1/T"],
+                    ["Spontaneous spikes", "Before pooling", "Presentations", "Variance = lambda/T"],
+                    ["Gaussian readout", "After pooling", "Presentations", "Variance = sigma_read^2"],
+                ],
+                [1.55 * inch, 1.82 * inch, 1.55 * inch, 2.10 * inch],
+                styles,
+            ),
+            Spacer(1, 0.09 * inch),
+            Paragraph("A.4 Why the two duration effects oppose each other", styles["subsection"]),
+            Paragraph(
+                "For two exemplars of the same source, the stable source mean cancels. The distinguishing signal is the difference between two shrinking exemplar deviations:",
+                styles["body"],
+            ),
+            equation_block(
+                [
+                    "Delta r_ex(T) = delta_(s,e1)(T) - delta_(s,e2)(T)",
+                    "d'_ex(T) propto T^(-1/2) / sqrt(c/T + sigma_read^2)",
+                ],
+                styles,
+            ),
+            Spacer(1, 0.07 * inch),
+            Paragraph(
+                "For two different sources, the stable source separation remains while within-source exemplar variability averages away:",
+                styles["body"],
+            ),
+            equation_block(
+                [
+                    "Delta r_source(T) = mu_s1 - mu_s2 + delta_(s1,e1)(T) - delta_(s2,e2)(T)",
+                    "d'_source(T) propto ||mu_s1 - mu_s2|| / sqrt(c/T + sigma_read^2)",
+                ],
+                styles,
+                PALE_TEAL,
+            ),
+            Spacer(1, 0.08 * inch),
+            callout(
+                "The exemplar signal shrinks toward a fixed readout-noise floor, so exemplar discrimination declines. The source signal remains fixed while within-source variability falls, so source discrimination improves and then plateaus.",
+                styles,
+                PALE_ORANGE,
+            ),
+            Spacer(1, 0.08 * inch),
+            Paragraph("A.5 Acoustic masking noise is not yet included", styles["subsection"]),
+            Paragraph(
+                "The present model does not add a fresh acoustic masker before the filterbank. A future external-noise condition would use <font name='Courier'>x_presented^(j)(t) = x_frozen(t) + beta n^(j)(t)</font>.",
                 styles["body"],
             ),
         ]

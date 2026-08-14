@@ -144,8 +144,8 @@ def compare_mixed_results(
 
 def verify_pdf(path: Path) -> None:
     reader = PdfReader(path)
-    if len(reader.pages) != 8:
-        raise AssertionError(f"expected 8 PDF pages, found {len(reader.pages)}")
+    if len(reader.pages) != 10:
+        raise AssertionError(f"expected 10 PDF pages, found {len(reader.pages)}")
     text = "\n".join(page.extract_text() or "" for page in reader.pages)
     normalized_text = " ".join(text.split())
     required = [
@@ -157,6 +157,10 @@ def verify_pdf(path: Path) -> None:
         "5. Mechanistic interpretation",
         "6. Source-statistics extension",
         "7. Limitations and next experiments",
+        "Appendix A. Where variability enters",
+        "Appendix A. Noise after pooling and duration effects",
+        "Complete stochastic feature equation",
+        "Var[r_k(T)] approx {rho_k p(1-p) + lambda} / T + sigma_read^2",
         "100.0% 88.0% 72.3% 59.8%",
         "99.8% 86.8% 99.6% 99.3%",
     ]
