@@ -144,23 +144,28 @@ def compare_mixed_results(
 
 def verify_pdf(path: Path) -> None:
     reader = PdfReader(path)
-    if len(reader.pages) != 10:
-        raise AssertionError(f"expected 10 PDF pages, found {len(reader.pages)}")
+    if len(reader.pages) != 12:
+        raise AssertionError(f"expected 12 PDF pages, found {len(reader.pages)}")
     text = "\n".join(page.extract_text() or "" for page in reader.pages)
     normalized_text = " ".join(text.split())
     required = [
         "Frozen-Noise Discrimination",
-        "1. Question and modeling hypothesis",
+        "1. Introduction: the McDermott result",
         "2. Model architecture",
         "3. Experiment and evaluation",
         "4. Initial results",
         "5. Mechanistic interpretation",
         "6. Source-statistics extension",
         "7. Limitations and next experiments",
-        "Appendix A. Where variability enters",
-        "Appendix A. Noise after pooling and duration effects",
+        "Primary study. McDermott, J. H., Schemitsch, M., & Simoncelli, E. P.",
+        "Appendix A. A plain-language noise model",
+        "Appendix A. From clean spikes to a noisy rate",
+        "Appendix A. Why duration reverses the two tasks",
+        "Appendix A. Interpretation and model boundary",
         "Complete stochastic feature equation",
-        "Var[r_k(T)] approx {rho_k p(1-p) + lambda} / T + sigma_read^2",
+        "The classifier never sees the waveform directly.",
+        "Because D and B are counts collected across the T-second window",
+        "The crossover in one sentence.",
         "100.0% 88.0% 72.3% 59.8%",
         "99.8% 86.8% 99.6% 99.3%",
     ]

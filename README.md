@@ -7,6 +7,12 @@ fixed internal noise is added after temporal pooling. A second experiment asks
 the complementary question: whether stable differences between noise-source
 statistics become easier to estimate as excerpts get longer.
 
+The scientific motivation is McDermott, Schemitsch, and Simoncelli's
+psychophysical study, which found that performance improved with duration for
+different texture sources but declined for distinct exemplars of the same
+texture: [*Summary statistics in auditory perception*](https://doi.org/10.1038/nn.3347)
+(2013).
+
 The repository is self-contained. It does not require an external dataset,
 web API, GPU, notebook, or proprietary software.
 
@@ -48,8 +54,8 @@ The final command performs the complete pipeline:
 2. Regenerates the exemplar-versus-source statistics experiment.
 3. Writes CSV and dependency-free SVG outputs for both experiments.
 4. Compares every reproduced field with the checked-in reference CSVs.
-5. Builds the ten-page PDF report from the reproduced CSVs, including a
-   mathematical appendix locating each source of variability.
+5. Builds the twelve-page PDF report, including a cited introduction and a
+   plain-language mathematical appendix rendered as scalable STIX vector paths.
 6. Reopens the PDF and verifies its page count and required sections.
 7. Verifies the checked-in reference-artifact hashes.
 8. Writes machine-readable reproduction metadata and SHA-256 hashes.
@@ -213,9 +219,14 @@ Appendix A of the PDF write-up distinguishes four sources of variability:
 
 The resulting conditional rate variance is approximately
 
-```text
-Var[r_k(T)] = {rho_k p(1-p) + lambda}/T + sigma_read^2.
-```
+$$
+\operatorname{Var}[r_k(T)] \approx
+\frac{\rho_k p(1-p)+\lambda}{T}+\sigma_{\mathrm{read}}^2.
+$$
+
+The report generator typesets this and the other appendix equations with
+Matplotlib's STIX math renderer, then writes the glyph outlines directly into
+the PDF as resolution-independent vector paths.
 
 Thus dropout and spontaneous-count noise average down with duration, while the
 post-pooling readout-noise floor does not.
