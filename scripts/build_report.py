@@ -24,6 +24,7 @@ from reportlab.platypus import (
 
 PROJECT = Path(__file__).resolve().parents[1]
 DEFAULT_CSV_PATH = PROJECT / "results" / "accuracy.csv"
+DEFAULT_SOURCE_CSV_PATH = PROJECT / "results" / "source-statistics.csv"
 DEFAULT_OUTPUT_PATH = PROJECT / "docs" / "frozen-noise-cortex-writeup.pdf"
 
 NAVY = colors.HexColor("#17324D")
@@ -46,6 +47,23 @@ def load_results(csv_path: Path) -> list[dict[str, float]]:
     with csv_path.open(newline="", encoding="utf-8") as handle:
         return [
             {key: float(value) for key, value in row.items()}
+            for row in csv.DictReader(handle)
+        ]
+
+
+def load_source_results(csv_path: Path) -> list[dict[str, str | float]]:
+    numeric_fields = {
+        "duration_ms",
+        "readout_noise_sd",
+        "accuracy_mean",
+        "accuracy_sem",
+    }
+    with csv_path.open(newline="", encoding="utf-8") as handle:
+        return [
+            {
+                key: float(value) if key in numeric_fields else value
+                for key, value in row.items()
+            }
             for row in csv.DictReader(handle)
         ]
 
@@ -261,6 +279,142 @@ class FingerprintChart(Flowable):
         c.drawString(left + 3, self.height - 10, "Clean rate distance (spikes/s)")
 
 
+class SourceStatisticsChart(Flowable):
+    def __init__(
+        self,
+        results: list[dict[str, str | float]],
+        width: float,
+        height: float = 250,
+        noise_sd: float = 20.0,
+    ):
+        super().__init__()
+        self.results = results
+        self.width = width
+        self.height = height
+        self.noise_sd = noise_sd
+
+    def draw(self) -> None:
+        c = self.canv
+        rows = [
+            row
+            for row in self.results
+            if float(row["readout_noise_sd"]) == self.noise_sd
+            and row["task"] in {"same_source_exemplar_mean", "different_source"}
+        ]
+        left, right, bottom, top = 45, 10, 34, 42
+        plot_w = self.width - left - right
+        plot_h = self.height - bottom - top
+        durations = sorted({float(row["duration_ms"]) for row in rows})
+        log_min = math.log10(min(durations))
+        log_max = math.log10(max(durations))
+
+        def x_pos(duration: float) -> float:
+            fraction = (math.log10(duration) - log_min) / (log_max - log_min)
+            return left + fraction * plot_w
+
+        def y_pos(accuracy: float) -> float:
+            return bottom + (accuracy - 0.5) / 0.5 * plot_h
+
+        c.setFont("Helvetica", 7.5)
+        for tick in (0.5, 0.6, 0.7, 0.8, 0.9, 1.0):
+            y = y_pos(tick)
+            c.setStrokeColor(LINE)
+            c.setLineWidth(0.6)
+            c.line(left, y, left + plot_w, y)
+            c.setFillColor(MID)
+            c.drawRightString(left - 6, y - 2.5, f"{int(tick * 100)}%")
+        for duration in durations:
+            x = x_pos(duration)
+            c.setStrokeColor(colors.HexColor("#EEF1F4"))
+            c.line(x, bottom, x, bottom + plot_h)
+            c.setFillColor(MID)
+            label = f"{duration / 1000:g}s" if duration >= 1000 else f"{int(duration)}ms"
+            c.drawCentredString(x, bottom - 12, label)
+        c.setStrokeColor(MID)
+        c.rect(left, bottom, plot_w, plot_h, fill=0, stroke=1)
+
+        series_specs = [
+            (
+                ("same_source_exemplar_mean", "all", ""),
+                "same-source exemplars",
+                MID,
+                True,
+            ),
+            (
+                ("different_source", "white", "light-pink"),
+                "white vs light-pink",
+                BLUE,
+                False,
+            ),
+            (
+                ("different_source", "white", "pink"),
+                "white vs pink",
+                TEAL,
+                False,
+            ),
+            (
+                ("different_source", "pink", "brown"),
+                "pink vs brown",
+                ORANGE,
+                False,
+            ),
+        ]
+        for series_index, (key, label, color, dashed) in enumerate(series_specs):
+            task, source_a, source_b = key
+            series = sorted(
+                (
+                    row
+                    for row in rows
+                    if row["task"] == task
+                    and row["source_a"] == source_a
+                    and row["source_b"] == source_b
+                ),
+                key=lambda row: float(row["duration_ms"]),
+            )
+            points = [
+                (
+                    x_pos(float(row["duration_ms"])),
+                    y_pos(float(row["accuracy_mean"])),
+                )
+                for row in series
+            ]
+            c.setStrokeColor(color)
+            c.setFillColor(WHITE)
+            c.setLineWidth(1.8)
+            if dashed:
+                c.setDash(5, 3)
+            for first, second in zip(points, points[1:]):
+                c.line(first[0], first[1], second[0], second[1])
+            c.setDash()
+            for row, (x, y) in zip(series, points):
+                mean = float(row["accuracy_mean"])
+                sem = float(row["accuracy_sem"])
+                y_low = y_pos(max(0.5, mean - sem))
+                y_high = y_pos(min(1.0, mean + sem))
+                c.line(x, y_low, x, y_high)
+                c.circle(x, y, 2.5, fill=1, stroke=1)
+
+            legend_x = left + (series_index % 2) * 177
+            legend_y = self.height - 11 - (series_index // 2) * 14
+            c.setStrokeColor(color)
+            c.setLineWidth(2.2)
+            if dashed:
+                c.setDash(5, 3)
+            c.line(legend_x, legend_y, legend_x + 14, legend_y)
+            c.setDash()
+            c.setFillColor(INK)
+            c.drawString(legend_x + 18, legend_y - 2.5, label)
+
+        c.setFillColor(INK)
+        c.setFont("Helvetica", 8)
+        c.drawCentredString(left + plot_w / 2, 3, "Excerpt duration (log scale)")
+        c.saveState()
+        c.translate(9, bottom + plot_h / 2)
+        c.rotate(90)
+        c.drawCentredString(0, 0, "Held-out accuracy")
+        c.restoreState()
+
+
 def make_styles() -> dict[str, ParagraphStyle]:
     sample = getSampleStyleSheet()
     return {
@@ -430,7 +584,7 @@ def on_first_page(canvas: Canvas, doc: SimpleDocTemplate) -> None:
     canvas.rect(0, LETTER[1] - 18, LETTER[0], 18, fill=1, stroke=0)
     canvas.setFillColor(MID)
     canvas.setFont("Helvetica", 7.5)
-    canvas.drawString(50, 24, "Frozen-noise cortex - exploratory model v0.1")
+    canvas.drawString(50, 24, "Frozen-noise cortex - exploratory model v0.2")
     canvas.drawRightString(LETTER[0] - 50, 24, "14 August 2026")
     canvas.restoreState()
 
@@ -457,12 +611,30 @@ def result_lookup(results: list[dict[str, float]]) -> dict[tuple[int, int], dict
     }
 
 
+def source_result_lookup(
+    results: list[dict[str, str | float]],
+) -> dict[tuple[str, str, str, int, int], dict[str, str | float]]:
+    return {
+        (
+            str(row["task"]),
+            str(row["source_a"]),
+            str(row["source_b"]),
+            int(float(row["duration_ms"])),
+            int(float(row["readout_noise_sd"])),
+        ): row
+        for row in results
+    }
+
+
 def build_pdf(
     csv_path: Path = DEFAULT_CSV_PATH,
     output_path: Path = DEFAULT_OUTPUT_PATH,
+    source_csv_path: Path = DEFAULT_SOURCE_CSV_PATH,
 ) -> Path:
     results = load_results(csv_path)
+    source_results = load_source_results(source_csv_path)
     lookup = result_lookup(results)
+    source_lookup = source_result_lookup(source_results)
     styles = make_styles()
     output_path.parent.mkdir(parents=True, exist_ok=True)
     doc = SimpleDocTemplate(
@@ -490,7 +662,7 @@ def build_pdf(
             AccentRule(7.02 * inch),
             Spacer(1, 0.20 * inch),
             callout(
-                "<b>Central result.</b> The model produces the proposed duration-by-noise interaction. At 1.6 s, mean held-out accuracy is 100% with no post-pooling readout noise, 88% at 10 spikes/s noise, 72% at 20 spikes/s, and 60% at 40 spikes/s. Chance is 50%.",
+                "<b>Central results.</b> Fixed readout noise exposes the loss of frozen-exemplar identity with duration. At 20 spikes/s noise, same-source exemplar accuracy falls from 99.8% at 25 ms to 70.9% at 1.6 s, while a subtle white versus light-pink source contrast rises from 86.8% to 99.8%. Chance is 50%.",
                 styles,
                 PALE_BLUE,
             ),
@@ -515,7 +687,7 @@ def build_pdf(
             ),
             Spacer(1, 0.12 * inch),
             Paragraph(
-                "Project version 0.1 | NumPy-only implementation | Reproducible seed: 7",
+                "Project version 0.2 | NumPy-only implementation | Reproducible seeds: 7 and 29",
                 styles["small"],
             ),
             PageBreak(),
@@ -834,10 +1006,74 @@ def build_pdf(
         ]
     )
 
+    # Source-statistics extension.
+    source_accuracy_rows: list[list[str]] = [
+        [
+            "Duration",
+            "Same-source exemplars",
+            "White vs light-pink",
+            "White vs pink",
+            "Pink vs brown",
+        ]
+    ]
+    for duration in (25, 100, 200, 400, 1600):
+        keys = [
+            ("same_source_exemplar_mean", "all", ""),
+            ("different_source", "white", "light-pink"),
+            ("different_source", "white", "pink"),
+            ("different_source", "pink", "brown"),
+        ]
+        source_accuracy_rows.append(
+            [
+                f"{duration} ms" if duration < 1000 else "1.6 s",
+                *[
+                    f"{float(source_lookup[(task, first, second, duration, 20)]['accuracy_mean']) * 100:.1f}%"
+                    for task, first, second in keys
+                ],
+            ]
+        )
+
+    story.extend(
+        [
+            Paragraph("6. Source-statistics extension", styles["section"]),
+            Paragraph("Complementary tasks", styles["subsection"]),
+            Paragraph(
+                "The extension asks whether the same pooled rate representation can reproduce the opposing duration effects reported for auditory textures. In the exemplar task, the classifier learns two fixed waveforms from the same noise family. In the source task, it trains on independent waveforms from two families and must generalize to previously unseen exemplars.",
+                styles["body"],
+            ),
+            Paragraph(
+                "Four Gaussian power-law families were generated within the 200-7,000 Hz model band: white (1/f^0), light-pink (1/f^0.5), pink (1/f^1), and brown (1/f^2). The light-pink condition supplies a deliberately subtle source contrast; canonical white-pink and pink-brown contrasts test stronger spectral differences.",
+                styles["body"],
+            ),
+            SourceStatisticsChart(source_results, 7.02 * inch),
+            Paragraph(
+                "Figure 3. Accuracy at 20 spikes/s post-pooling readout noise. The dashed curve averages frozen-exemplar discrimination over all four families. Solid curves classify noise family from independent training and test exemplars. Error bars show +/-1 SEM across frozen pairs or train/test splits.",
+                styles["small"],
+            ),
+            styled_table(
+                source_accuracy_rows,
+                [0.83 * inch, 1.55 * inch, 1.55 * inch, 1.35 * inch, 1.35 * inch],
+                styles,
+            ),
+            Spacer(1, 0.08 * inch),
+            callout(
+                "<b>Opposing duration effects.</b> Same-source exemplar accuracy falls from 99.8% at 25 ms to 70.9% at 1.6 s. The deliberately difficult white versus light-pink classification rises from 86.8% to 99.8%, crossing the exemplar curve between 100 and 200 ms.",
+                styles,
+                PALE_TEAL,
+            ),
+            Spacer(1, 0.08 * inch),
+            Paragraph(
+                "The mechanism is hierarchical: accidental exemplar deviations shrink with temporal averaging, but the stable mean spectral difference between sources remains. Canonical white-pink and pink-brown contrasts are nearly saturated even at 25 ms, showing that their source statistics are too different to reveal much duration dependence under these settings.",
+                styles["body"],
+            ),
+            PageBreak(),
+        ]
+    )
+
     # Limitations and next steps.
     story.extend(
         [
-            Paragraph("6. Limitations and next experiments", styles["section"]),
+            Paragraph("7. Limitations and next experiments", styles["section"]),
             Paragraph("Important limitations", styles["subsection"]),
             bullet_list(
                 [
@@ -894,7 +1130,7 @@ def build_pdf(
             Spacer(1, 0.12 * inch),
             Paragraph("Conclusion", styles["subsection"]),
             Paragraph(
-                "The small first model successfully turns the qualitative idea into a testable computation. Short frozen noises generate large accidental fingerprints across cochlear channels. Those fingerprints contract as duration grows, and fixed readout noise progressively prevents a linear discriminator from learning sample identity. The result is promising because it is mechanistically interpretable and because its most important alternative - preserved temporal coding - is straightforward to test next.",
+                "The model now reproduces both sides of the qualitative psychophysical result. Short frozen noises generate large accidental fingerprints across cochlear channels, but those fingerprints contract as duration grows. Stable differences between noise-source spectra persist and become easier to estimate as within-source fluctuations average away. The result is mechanistically interpretable, while its most important alternatives - preserved temporal coding and discrimination based on nonspectral texture statistics - remain straightforward to test next.",
                 styles["body"],
             ),
         ]
@@ -915,6 +1151,12 @@ def build_parser() -> argparse.ArgumentParser:
         help="input accuracy CSV",
     )
     parser.add_argument(
+        "--source-csv",
+        type=Path,
+        default=DEFAULT_SOURCE_CSV_PATH,
+        help="input source-statistics CSV",
+    )
+    parser.add_argument(
         "--output",
         type=Path,
         default=DEFAULT_OUTPUT_PATH,
@@ -925,5 +1167,5 @@ def build_parser() -> argparse.ArgumentParser:
 
 if __name__ == "__main__":
     arguments = build_parser().parse_args()
-    created = build_pdf(arguments.csv, arguments.output)
+    created = build_pdf(arguments.csv, arguments.output, arguments.source_csv)
     print(created)

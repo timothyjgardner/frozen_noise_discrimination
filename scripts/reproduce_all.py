@@ -22,10 +22,20 @@ from pypdf import PdfReader
 from build_report import build_pdf
 from frozen_noise_cortex.experiment import ExperimentConfig, run_experiment
 from frozen_noise_cortex.model import CochleaConfig
-from frozen_noise_cortex.report import write_accuracy_svg, write_csv
+from frozen_noise_cortex.report import (
+    write_accuracy_svg,
+    write_csv,
+    write_source_statistics_csv,
+    write_source_statistics_svg,
+)
+from frozen_noise_cortex.source_statistics import (
+    SourceStatisticsConfig,
+    run_source_statistics_experiment,
+)
 
 
 REFERENCE_CSV = ROOT / "results" / "accuracy.csv"
+REFERENCE_SOURCE_CSV = ROOT / "results" / "source-statistics.csv"
 REFERENCE_MANIFEST = ROOT / "ARTIFACTS.sha256"
 DEFAULT_OUTPUT = ROOT / "build" / "reproduced"
 
@@ -88,10 +98,54 @@ def compare_results(
     return maximum_delta
 
 
+def compare_mixed_results(
+    reference_path: Path,
+    reproduced_path: Path,
+    tolerance: float,
+) -> float:
+    """Compare a CSV containing both categorical and numeric columns."""
+
+    with reference_path.open(newline="", encoding="utf-8") as handle:
+        reference = list(csv.DictReader(handle))
+    with reproduced_path.open(newline="", encoding="utf-8") as handle:
+        reproduced = list(csv.DictReader(handle))
+    if len(reference) != len(reproduced):
+        raise AssertionError(
+            f"row count differs: reference={len(reference)}, reproduced={len(reproduced)}"
+        )
+
+    numeric_fields = {
+        "duration_ms",
+        "readout_noise_sd",
+        "accuracy_mean",
+        "accuracy_sem",
+    }
+    maximum_delta = 0.0
+    for row_index, (expected, actual) in enumerate(zip(reference, reproduced), start=2):
+        if expected.keys() != actual.keys():
+            raise AssertionError(f"columns differ at CSV row {row_index}")
+        for field in expected:
+            if field in numeric_fields:
+                delta = abs(float(expected[field]) - float(actual[field]))
+                maximum_delta = max(maximum_delta, delta)
+                if delta > tolerance:
+                    raise AssertionError(
+                        f"{field} differs at CSV row {row_index}: "
+                        f"expected={expected[field]!r}, actual={actual[field]!r}, "
+                        f"delta={delta:.3g}"
+                    )
+            elif expected[field] != actual[field]:
+                raise AssertionError(
+                    f"{field} differs at CSV row {row_index}: "
+                    f"expected={expected[field]!r}, actual={actual[field]!r}"
+                )
+    return maximum_delta
+
+
 def verify_pdf(path: Path) -> None:
     reader = PdfReader(path)
-    if len(reader.pages) != 7:
-        raise AssertionError(f"expected 7 PDF pages, found {len(reader.pages)}")
+    if len(reader.pages) != 8:
+        raise AssertionError(f"expected 8 PDF pages, found {len(reader.pages)}")
     text = "\n".join(page.extract_text() or "" for page in reader.pages)
     normalized_text = " ".join(text.split())
     required = [
@@ -101,8 +155,10 @@ def verify_pdf(path: Path) -> None:
         "3. Experiment and evaluation",
         "4. Initial results",
         "5. Mechanistic interpretation",
-        "6. Limitations and next experiments",
+        "6. Source-statistics extension",
+        "7. Limitations and next experiments",
         "100.0% 88.0% 72.3% 59.8%",
+        "99.8% 86.8% 99.6% 99.3%",
     ]
     missing = [value for value in required if value not in normalized_text]
     if missing:
@@ -138,6 +194,8 @@ def main(argv: list[str] | None = None) -> None:
     reproduced_csv = output_dir / "accuracy.csv"
     reproduced_svg = output_dir / "accuracy.svg"
     reproduced_pdf = output_dir / "frozen-noise-cortex-writeup.pdf"
+    reproduced_source_csv = output_dir / "source-statistics.csv"
+    reproduced_source_svg = output_dir / "source-statistics.svg"
     metadata_path = output_dir / "reproduction-metadata.json"
 
     write_csv(results, reproduced_csv)
@@ -147,7 +205,19 @@ def main(argv: list[str] | None = None) -> None:
         reproduced_csv,
         arguments.tolerance,
     )
-    build_pdf(reproduced_csv, reproduced_pdf)
+    source_results = run_source_statistics_experiment(
+        SourceStatisticsConfig(),
+        CochleaConfig(),
+    )
+    write_source_statistics_csv(source_results, reproduced_source_csv)
+    write_source_statistics_svg(source_results, reproduced_source_svg)
+    source_maximum_delta = compare_mixed_results(
+        REFERENCE_SOURCE_CSV,
+        reproduced_source_csv,
+        arguments.tolerance,
+    )
+    maximum_delta = max(maximum_delta, source_maximum_delta)
+    build_pdf(reproduced_csv, reproduced_pdf, reproduced_source_csv)
     verify_pdf(reproduced_pdf)
 
     metadata = {
@@ -164,13 +234,19 @@ def main(argv: list[str] | None = None) -> None:
                 "sha256": sha256(path),
                 "bytes": path.stat().st_size,
             }
-            for path in (reproduced_csv, reproduced_svg, reproduced_pdf)
+            for path in (
+                reproduced_csv,
+                reproduced_svg,
+                reproduced_source_csv,
+                reproduced_source_svg,
+                reproduced_pdf,
+            )
         },
     }
     metadata_path.write_text(json.dumps(metadata, indent=2) + "\n", encoding="utf-8")
 
     print("Reproduction verified")
-    print(f"Numeric rows: {len(results)}")
+    print(f"Numeric rows: {len(results) + len(source_results)}")
     print(f"Maximum CSV delta: {maximum_delta:.3g}")
     print(f"Artifacts: {output_dir}")
 

@@ -4,8 +4,8 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "frozen-noise-cortex"
-version = "0.1.0"
-description = "A small cochlear-filterbank model of frozen white-noise discrimination."
+version = "0.2.0"
+description = "A cochlear-filterbank model of frozen-exemplar and noise-source discrimination."
 readme = "README.md"
 requires-python = ">=3.10"
 dependencies = ["numpy>=1.24"]

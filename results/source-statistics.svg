@@ -1,0 +1,104 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="880" height="520" viewBox="0 0 880 520" role="img" aria-labelledby="title desc">
+<title id="title">Exemplar and source discrimination by duration</title>
+<desc id="desc">Same-source frozen-exemplar accuracy declines with duration while discrimination between power-law noise families improves or remains at ceiling.</desc>
+<rect width="100%" height="100%" fill="white"/>
+<text x="82" y="28" font-family="system-ui" font-size="20" font-weight="600">Exemplar identity fades; source statistics stabilize</text>
+<text x="82" y="50" font-family="system-ui" font-size="12" fill="#4b5563">Readout-noise SD: 20 spikes/s; chance: 50%</text>
+<line x1="82" x2="852" y1="452.0" y2="452.0" stroke="#d1d5db" stroke-width="1"/>
+<text x="70" y="456.0" text-anchor="end" font-family="system-ui" font-size="12" fill="#374151">0.5</text>
+<line x1="82" x2="852" y1="380.0" y2="380.0" stroke="#d1d5db" stroke-width="1"/>
+<text x="70" y="384.0" text-anchor="end" font-family="system-ui" font-size="12" fill="#374151">0.6</text>
+<line x1="82" x2="852" y1="308.0" y2="308.0" stroke="#d1d5db" stroke-width="1"/>
+<text x="70" y="312.0" text-anchor="end" font-family="system-ui" font-size="12" fill="#374151">0.7</text>
+<line x1="82" x2="852" y1="236.0" y2="236.0" stroke="#d1d5db" stroke-width="1"/>
+<text x="70" y="240.0" text-anchor="end" font-family="system-ui" font-size="12" fill="#374151">0.8</text>
+<line x1="82" x2="852" y1="164.0" y2="164.0" stroke="#d1d5db" stroke-width="1"/>
+<text x="70" y="168.0" text-anchor="end" font-family="system-ui" font-size="12" fill="#374151">0.9</text>
+<line x1="82" x2="852" y1="92.0" y2="92.0" stroke="#d1d5db" stroke-width="1"/>
+<text x="70" y="96.0" text-anchor="end" font-family="system-ui" font-size="12" fill="#374151">1.0</text>
+<line x1="82.0" x2="82.0" y1="92" y2="452" stroke="#f0f0f0" stroke-width="1"/>
+<text x="82.0" y="476" text-anchor="middle" font-family="system-ui" font-size="12" fill="#374151">25 ms</text>
+<line x1="210.3" x2="210.3" y1="92" y2="452" stroke="#f0f0f0" stroke-width="1"/>
+<text x="210.3" y="476" text-anchor="middle" font-family="system-ui" font-size="12" fill="#374151">50 ms</text>
+<line x1="338.7" x2="338.7" y1="92" y2="452" stroke="#f0f0f0" stroke-width="1"/>
+<text x="338.7" y="476" text-anchor="middle" font-family="system-ui" font-size="12" fill="#374151">100 ms</text>
+<line x1="467.0" x2="467.0" y1="92" y2="452" stroke="#f0f0f0" stroke-width="1"/>
+<text x="467.0" y="476" text-anchor="middle" font-family="system-ui" font-size="12" fill="#374151">200 ms</text>
+<line x1="595.3" x2="595.3" y1="92" y2="452" stroke="#f0f0f0" stroke-width="1"/>
+<text x="595.3" y="476" text-anchor="middle" font-family="system-ui" font-size="12" fill="#374151">400 ms</text>
+<line x1="723.7" x2="723.7" y1="92" y2="452" stroke="#f0f0f0" stroke-width="1"/>
+<text x="723.7" y="476" text-anchor="middle" font-family="system-ui" font-size="12" fill="#374151">800 ms</text>
+<line x1="852.0" x2="852.0" y1="92" y2="452" stroke="#f0f0f0" stroke-width="1"/>
+<text x="852.0" y="476" text-anchor="middle" font-family="system-ui" font-size="12" fill="#374151">1.6 s</text>
+<rect x="82" y="92" width="770" height="360" fill="none" stroke="#6b7280"/>
+<polyline points="82.0,93.3 210.3,97.7 338.7,104.2 467.0,137.8 595.3,194.7 723.7,248.1 852.0,301.2" fill="none" stroke="#4b5563" stroke-width="2.5" stroke-dasharray="7 5"/>
+<line x1="82.0" x2="82.0" y1="92.7" y2="93.8" stroke="#4b5563"/>
+<circle cx="82.0" cy="93.3" r="4" fill="white" stroke="#4b5563" stroke-width="2"/>
+<line x1="210.3" x2="210.3" y1="95.6" y2="99.9" stroke="#4b5563"/>
+<circle cx="210.3" cy="97.7" r="4" fill="white" stroke="#4b5563" stroke-width="2"/>
+<line x1="338.7" x2="338.7" y1="100.9" y2="107.4" stroke="#4b5563"/>
+<circle cx="338.7" cy="104.2" r="4" fill="white" stroke="#4b5563" stroke-width="2"/>
+<line x1="467.0" x2="467.0" y1="131.5" y2="144.1" stroke="#4b5563"/>
+<circle cx="467.0" cy="137.8" r="4" fill="white" stroke="#4b5563" stroke-width="2"/>
+<line x1="595.3" x2="595.3" y1="184.4" y2="204.9" stroke="#4b5563"/>
+<circle cx="595.3" cy="194.7" r="4" fill="white" stroke="#4b5563" stroke-width="2"/>
+<line x1="723.7" x2="723.7" y1="237.4" y2="258.8" stroke="#4b5563"/>
+<circle cx="723.7" cy="248.1" r="4" fill="white" stroke="#4b5563" stroke-width="2"/>
+<line x1="852.0" x2="852.0" y1="291.7" y2="310.7" stroke="#4b5563"/>
+<circle cx="852.0" cy="301.2" r="4" fill="white" stroke="#4b5563" stroke-width="2"/>
+<line x1="82" x2="106" y1="68" y2="68" stroke="#4b5563" stroke-width="3" stroke-dasharray="7 5"/>
+<text x="113" y="72" font-family="system-ui" font-size="12" fill="#111827">same-source exemplars</text>
+<polyline points="82.0,187.3 210.3,149.8 338.7,116.1 467.0,100.7 595.3,98.2 723.7,93.6 852.0,93.3" fill="none" stroke="#2563eb" stroke-width="2.5"/>
+<line x1="82.0" x2="82.0" y1="182.8" y2="191.8" stroke="#2563eb"/>
+<circle cx="82.0" cy="187.3" r="4" fill="white" stroke="#2563eb" stroke-width="2"/>
+<line x1="210.3" x2="210.3" y1="146.5" y2="153.2" stroke="#2563eb"/>
+<circle cx="210.3" cy="149.8" r="4" fill="white" stroke="#2563eb" stroke-width="2"/>
+<line x1="338.7" x2="338.7" y1="112.7" y2="119.4" stroke="#2563eb"/>
+<circle cx="338.7" cy="116.1" r="4" fill="white" stroke="#2563eb" stroke-width="2"/>
+<line x1="467.0" x2="467.0" y1="99.3" y2="102.2" stroke="#2563eb"/>
+<circle cx="467.0" cy="100.7" r="4" fill="white" stroke="#2563eb" stroke-width="2"/>
+<line x1="595.3" x2="595.3" y1="96.8" y2="99.7" stroke="#2563eb"/>
+<circle cx="595.3" cy="98.2" r="4" fill="white" stroke="#2563eb" stroke-width="2"/>
+<line x1="723.7" x2="723.7" y1="92.8" y2="94.3" stroke="#2563eb"/>
+<circle cx="723.7" cy="93.6" r="4" fill="white" stroke="#2563eb" stroke-width="2"/>
+<line x1="852.0" x2="852.0" y1="92.7" y2="93.8" stroke="#2563eb"/>
+<circle cx="852.0" cy="93.3" r="4" fill="white" stroke="#2563eb" stroke-width="2"/>
+<line x1="347" x2="371" y1="68" y2="68" stroke="#2563eb" stroke-width="3"/>
+<text x="378" y="72" font-family="system-ui" font-size="12" fill="#111827">white vs light-pink</text>
+<polyline points="82.0,94.8 210.3,92.0 338.7,92.0 467.0,92.0 595.3,92.0 723.7,92.0 852.0,92.0" fill="none" stroke="#059669" stroke-width="2.5"/>
+<line x1="82.0" x2="82.0" y1="94.1" y2="95.5" stroke="#059669"/>
+<circle cx="82.0" cy="94.8" r="4" fill="white" stroke="#059669" stroke-width="2"/>
+<line x1="210.3" x2="210.3" y1="92.0" y2="92.0" stroke="#059669"/>
+<circle cx="210.3" cy="92.0" r="4" fill="white" stroke="#059669" stroke-width="2"/>
+<line x1="338.7" x2="338.7" y1="92.0" y2="92.0" stroke="#059669"/>
+<circle cx="338.7" cy="92.0" r="4" fill="white" stroke="#059669" stroke-width="2"/>
+<line x1="467.0" x2="467.0" y1="92.0" y2="92.0" stroke="#059669"/>
+<circle cx="467.0" cy="92.0" r="4" fill="white" stroke="#059669" stroke-width="2"/>
+<line x1="595.3" x2="595.3" y1="92.0" y2="92.0" stroke="#059669"/>
+<circle cx="595.3" cy="92.0" r="4" fill="white" stroke="#059669" stroke-width="2"/>
+<line x1="723.7" x2="723.7" y1="92.0" y2="92.0" stroke="#059669"/>
+<circle cx="723.7" cy="92.0" r="4" fill="white" stroke="#059669" stroke-width="2"/>
+<line x1="852.0" x2="852.0" y1="92.0" y2="92.0" stroke="#059669"/>
+<circle cx="852.0" cy="92.0" r="4" fill="white" stroke="#059669" stroke-width="2"/>
+<line x1="82" x2="106" y1="86" y2="86" stroke="#059669" stroke-width="3"/>
+<text x="113" y="90" font-family="system-ui" font-size="12" fill="#111827">white vs pink</text>
+<polyline points="82.0,96.7 210.3,93.3 338.7,92.0 467.0,92.0 595.3,92.0 723.7,92.0 852.0,92.0" fill="none" stroke="#d97706" stroke-width="2.5"/>
+<line x1="82.0" x2="82.0" y1="95.5" y2="97.9" stroke="#d97706"/>
+<circle cx="82.0" cy="96.7" r="4" fill="white" stroke="#d97706" stroke-width="2"/>
+<line x1="210.3" x2="210.3" y1="92.7" y2="93.8" stroke="#d97706"/>
+<circle cx="210.3" cy="93.3" r="4" fill="white" stroke="#d97706" stroke-width="2"/>
+<line x1="338.7" x2="338.7" y1="92.0" y2="92.0" stroke="#d97706"/>
+<circle cx="338.7" cy="92.0" r="4" fill="white" stroke="#d97706" stroke-width="2"/>
+<line x1="467.0" x2="467.0" y1="92.0" y2="92.0" stroke="#d97706"/>
+<circle cx="467.0" cy="92.0" r="4" fill="white" stroke="#d97706" stroke-width="2"/>
+<line x1="595.3" x2="595.3" y1="92.0" y2="92.0" stroke="#d97706"/>
+<circle cx="595.3" cy="92.0" r="4" fill="white" stroke="#d97706" stroke-width="2"/>
+<line x1="723.7" x2="723.7" y1="92.0" y2="92.0" stroke="#d97706"/>
+<circle cx="723.7" cy="92.0" r="4" fill="white" stroke="#d97706" stroke-width="2"/>
+<line x1="852.0" x2="852.0" y1="92.0" y2="92.0" stroke="#d97706"/>
+<circle cx="852.0" cy="92.0" r="4" fill="white" stroke="#d97706" stroke-width="2"/>
+<line x1="347" x2="371" y1="86" y2="86" stroke="#d97706" stroke-width="3"/>
+<text x="378" y="90" font-family="system-ui" font-size="12" fill="#111827">pink vs brown</text>
+<text x="467.0" y="504" text-anchor="middle" font-family="system-ui" font-size="13" fill="#111827">Excerpt duration (log scale)</text>
+<text x="20" y="272.0" text-anchor="middle" transform="rotate(-90 20 272.0)" font-family="system-ui" font-size="13" fill="#111827">Held-out accuracy</text>
+</svg>
