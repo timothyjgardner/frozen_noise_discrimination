@@ -241,7 +241,7 @@ Appendix A of the PDF write-up distinguishes four sources of variability:
 The resulting conditional rate variance is approximately
 
 $$
-\operatorname{Var}[r_k(T)] \approx
+\mathrm{Var}[r_k(T)] \approx
 \frac{\rho_k p(1-p)+\lambda}{T}+\sigma_{\mathrm{read}}^2.
 $$
 
