@@ -33,6 +33,27 @@ of the deliberately subtle white versus light-pink families increases from
 86.8% to 99.8%, crossing the exemplar curve between 100 and 200 ms. Canonical
 white-pink and pink-brown contrasts are already near ceiling at 25 ms.
 
+## Main figures
+
+### Frozen-exemplar discrimination
+
+[![Held-out frozen-exemplar classification accuracy decreases with duration as post-pooling readout noise increases.](results/accuracy.svg)](results/accuracy.svg)
+
+**Figure 1.** Held-out accuracy for two frozen white-noise exemplars. Without
+post-pooling noise the deterministic rate fingerprints remain separable. Fixed
+readout noise progressively hides the shrinking fingerprint as duration grows.
+[Underlying data](results/accuracy.csv)
+
+### Same-source exemplars versus different sources
+
+[![Same-source exemplar accuracy decreases with duration while classification of different noise-source statistics improves.](results/source-statistics.svg)](results/source-statistics.svg)
+
+**Figure 2.** Opposing duration effects at 20 spikes/s readout noise. The dashed
+curve averages same-source exemplar discrimination across all four power-law
+families. Solid curves classify previously unseen exemplars from different
+source families; white versus light-pink is the most informative non-ceiling
+contrast. [Underlying data](results/source-statistics.csv)
+
 ## Reproduce everything
 
 Python 3.12 is recommended. Python 3.10 or newer is supported.
@@ -88,7 +109,7 @@ make reproduce
 |-- scripts/
 |   |-- reproduce_all.py             End-to-end deterministic reproduction
 |   |-- run_source_statistics.py     Standalone source-statistics sweep
-|   `-- build_report.py              Ten-page PDF report builder
+|   `-- build_report.py              Twelve-page PDF report builder
 |-- tests/test_model.py              Unit and integration tests
 |-- results/accuracy.csv             Checked-in reference numbers
 |-- results/accuracy.svg             Checked-in reference plot
