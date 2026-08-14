@@ -1,0 +1,6 @@
+numpy==2.3.5
+pillow==12.3.0
+pypdf==6.10.0
+reportlab==4.4.9
+setuptools==83.0.0
+wheel==0.47.0

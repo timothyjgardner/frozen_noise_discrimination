@@ -1,0 +1,25 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "frozen-noise-cortex"
+version = "0.1.0"
+description = "A small cochlear-filterbank model of frozen white-noise discrimination."
+readme = "README.md"
+requires-python = ">=3.10"
+dependencies = ["numpy>=1.24"]
+
+[project.optional-dependencies]
+reproduce = [
+    "numpy==2.3.5",
+    "pillow==12.3.0",
+    "pypdf==6.10.0",
+    "reportlab==4.4.9",
+]
+
+[project.scripts]
+frozen-noise-demo = "frozen_noise_cortex.cli:main"
+
+[tool.setuptools.packages.find]
+where = ["src"]
